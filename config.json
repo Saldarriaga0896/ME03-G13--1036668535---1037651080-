@@ -1,0 +1,111 @@
+{
+    "project_name" : "prueba",
+    "data_path": "data/bank-full.csv", 
+    "sep" : ";",
+    "target_column": "y",
+    "split" : 0.1,
+
+    "missing_threshold" : 0.1,
+    "numeric_imputer" : "mean",
+    "categorical_imputer" : "most_frequent",
+    "threshold_outlier" : 3,
+    "balance_method" : "over_sampling",
+    "balance_thershold" : 0.7,
+    "k_features" : 0.5,
+    "delete_columns" : [],
+
+    "model_type" : "Classification",
+    "function": "training", 
+    "n_jobs": -1,
+    "cv": 5,
+    "scoring_regression": "neg_mean_squared_error",
+    "scoring_classification" :"f1_micro",
+    "random_state": 1234,
+
+    "models_regression": {
+        "linearRegression" : true,
+        "ridge" : true,
+        "random_forest": false,
+        "ada_boost" : false,
+        "gradient_boosting" : false,
+        "lightGBM": false
+    },
+
+    "params_regression" : {
+        "linearRegression" :{
+                "fit_intercept": [true, false]
+        },
+
+        "ridge": {
+            "alpha": [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+        },
+
+        "random_forest": {
+            "n_estimators": [20,50,100,200],
+            "max_depth": [5, 10, 20, 30],
+            "max_features": [7, 9, 11, 12]
+            
+        },
+        
+        "ada_boost": {
+            "n_estimators" : [1,10,30,50,70,100],
+            "learning_rate" :[0.001,0.01,0.1]
+        },
+
+        "gradient_boosting": {
+            "n_estimators": [1,10,30,50,70,100],
+            "learning_rate": [0.1, 0.01, 0.001],
+            "max_depth": [3, 5, 7]
+        },
+
+        "lightGBM":{
+            "n_estimators": [1, 400],
+            "max_depth": [1, 50],
+            "learning_rate": [0.001, 0.1],
+            "num_leaves": [2, 50]
+        }
+    },
+
+    "models_classification": {
+        "logisticRegression": false,
+        "random_forest": true,
+        "ada_boost" : true,
+        "gradient_boosting" : false,
+        "lightGBM": true
+    },
+
+    "params_classification" : {
+        "logisticRegression": {
+            "multi_class": ["ovr", "multinomial"],
+            "solver" : ["liblinear","lbfgs"],
+            "class_weight" : ["balanced"]
+        },
+
+        "random_forest": {
+            "n_estimators" : [20, 50, 100, 200, 300],
+            "max_features" : [5, 7, 9],
+            "max_depth" : [5, 10, 20, 30, 40, 50],
+            "criterion" : ["gini", "entropy"]
+        },
+
+        "ada_boost": {
+            "n_estimators" : [5,10,30,50],
+            "learning_rate" :[0.001,0.01,0.1]
+        },
+
+        "gradient_boosting": {
+            "n_estimators"  : [2, 3, 5],
+            "max_features"  : ["auto", "sqrt", "log2"],
+            "max_depth"     : [2, 3, 5],
+            "subsample"     : [0.5, 1], 
+            "learning_rate" : [0.001, 0.01, 0.1]
+        },
+
+        "lightGBM":{
+            "n_estimators": [1, 400],
+            "max_depth": [1, 50],
+            "learning_rate": [0.001, 0.1],
+            "num_leaves": [2, 50]
+        }
+    }
+}
