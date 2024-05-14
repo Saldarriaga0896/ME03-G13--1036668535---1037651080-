@@ -1,6 +1,6 @@
 {
     "project_name" : "prueba",
-    "data_path": "data/bank-full.csv", 
+    "data_path": "data/bank-full copy.csv", 
     "sep" : ";",
     "target_column": "y",
     "split" : 0.1,
@@ -8,6 +8,7 @@
     "missing_threshold" : 0.1,
     "numeric_imputer" : "mean",
     "categorical_imputer" : "most_frequent",
+    "threshold_categorical" : 50,
     "threshold_outlier" : 3,
     "balance_method" : "over_sampling",
     "balance_thershold" : 0.7,

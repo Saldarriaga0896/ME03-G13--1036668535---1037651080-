@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 import sys
-from scipy.stats import zscore
+import re
+import unidecode
 
+from scipy.stats import zscore
 from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
@@ -27,11 +29,14 @@ class DataPreprocessor:
         self.delete_columns = self.config.get('delete_columns')
         self.split = self.config.get('split')
         self.k = self.config.get('k_features')
+        self.threshold_categorical = self.config.get('threshold_categorical')
 
         self.label_encoder = LabelEncoder()
         self.numeric_imputer = SimpleImputer(strategy = self.config.get("numeric_imputer"))
-        self.categorical_imputer = SimpleImputer(strategy = self.config.get("categorical_imputer"))
-
+        if self.config.get("categorical_imputer") != 'unknown':
+            self.categorical_imputer = SimpleImputer(strategy = self.config.get("categorical_imputer"))
+        else:
+            self.categorical_imputer = self.config.get("categorical_imputer")
         self.scaler_X = StandardScaler()
         self.scaler_y = StandardScaler()
 
@@ -56,7 +61,7 @@ class DataPreprocessor:
         else:
             self.sampler = None
 
-        self.unprocessed_columns = [] # columnas no procesadas por no cumplir criterios de nulos
+        self.unprocessed_columns = {} # columnas no procesadas
 
     # Función para cargar los datos y hacer depuración. 
     def load_dataset(self):
@@ -114,6 +119,45 @@ class DataPreprocessor:
         except Exception as e:
             print("Error cargando el dataset:", e)
 
+    #Función para procesar las columnas categóricas 
+    def transform_categorical_columns(self): 
+        if self.categorical_columns is not None:
+            categorical_data = self.df[self.categorical_columns]
+            if not categorical_data.empty: 
+                # Convertir todas las categorías a minúsculas y eliminar tildes para cada columna
+                for column in categorical_data.columns:
+                    categorical_data.loc[:,column] = categorical_data[column].map(
+                        lambda x: unidecode.unidecode(str(x)).lower() if pd.notnull(x) else 'desconocido'
+                    )
+                # Contar cuántos valores únicos existen
+                unique_values = categorical_data.nunique()
+                
+                columns_limits = []
+                # Encontrar columnas que superan el límite de categorías
+                for column, n_unique_values in unique_values.items():
+                    if n_unique_values > self.threshold_categorical:
+                        columns_limits.append(column)
+
+                print("Valores únicos por columna:")
+                print(unique_values)
+                print("Columnas con más de {} categorías:".format(self.threshold_categorical))
+                print(columns_limits)
+
+                self.unprocessed_columns['columns_limits'] = columns_limits
+                #VALIDAR si la columnas contienen caracteres especiales numeros y caracteres si es así descartar 
+                # Patrón para encontrar datos que contienen al menos un dígito, al menos un carácter alfabético y al menos un carácter especial
+                pattern = r'^(?=.*\d)(?=.*[a-zA-Z])(?=.*[@\-\/#\$%&]).*$'
+                columns_pattern = []
+                # Aplicar el patrón a cada columna categórica
+                for column in categorical_data.columns:
+                    # Verificar si al menos un valor en la columna cumple con el patrón
+                    if categorical_data[column].apply(lambda x: bool(re.match(pattern, str(x)))).any():
+                        columns_pattern.append(column)
+                
+                print("Columnas con valores mixtos en las categorías:")
+                print(columns_pattern)
+
+                self.unprocessed_columns['columns_pattern'] = columns_pattern
     # Función para realizar un analisis descriptivo y una visualización de los datos
     def descriptive_analysis(self):
         print(" Información de los datos: ")
@@ -220,41 +264,83 @@ class DataPreprocessor:
         print("------------ Creando transformadores  -------------")
         sys.stdout.flush()
         print("---------------------------------------------------")
-        sys.stdout.flush()#
+        sys.stdout.flush()
 
+        #---------------------------------------------------------------------------------------------#
+        #--------------------------------- Imputar ---------------------------------------------------#
+        #---------------------------------------------------------------------------------------------#
         print("Imputar datos numéricos.")
         sys.stdout.flush()
         numeric_data = self.X[self.numeric_columns]
+        numeric_columns = []
+        numeric_columns_null = []
         # Verificar si hay datos faltantes en las variables numéricas
-        if numeric_data.isnull().any().any():
-            # Verificar si el porcentaje de datos faltantes es menor que el umbral
-            if numeric_data.isnull().mean().mean() < self.missing_threshold:
-                # Ajustar el imputador a todas las variables numéricas
-                self.numeric_imputer.fit(numeric_data)
-                # Guardar el imputador en el diccionario de transformadores
-                self.transformers['numeric_imputer'] = self.numeric_imputer
-            else:
-                print(f"Al menos una de las columnas numéricas tiene un porcentaje de datos faltantes mayor al {self.missing_threshold * 100}%")
-            
+        for column in numeric_data.columns:
+            if numeric_data[column].isnull().any():
+                # Verificar si el porcentaje de datos faltantes es menor que el umbral
+                if numeric_data[column].isnull().mean() * 100 < self.missing_threshold:
+                    numeric_columns.append(column)
+                else:
+                    numeric_columns_null.append(column)
+
+        if numeric_columns_null:
+            print(f"Las siguientes columnas requieren revisión manual ya que tiene un porcentaje de datos faltantes mayor al {self.missing_threshold}%")
+            print(numeric_columns_null)
+            self.unprocessed_columns["numeric_columns_null"] = numeric_columns_null
+            # Eliminar las columnas 
+            numeric_data = numeric_data.drop(numeric_columns_null, axis=1)
+            # Eliminar las columnas de la lista global de columnas categoricas
+            self.numeric_columns = [col for col in self.numeric_columns if col not in numeric_columns_null]
+        elif numeric_columns:
+            print("Se imputaron las siguientes columnas: ")
+            print(numeric_columns)
+
         else:
             print("No hay datos faltantes en las columnas numéricas, no se requiere imputación.")
+
+        #Entrenar el imputador
+        self.numeric_imputer.fit(numeric_data)
+        # Guardar el imputador en el diccionario de transformadores
+        self.transformers['numeric_imputer'] = self.numeric_imputer 
 
         print("Imputar datos categóricos.")
         sys.stdout.flush()
         categorical_data = self.X[self.categorical_columns]
-        # Verificar si hay datos faltantes en las variables categóricas
-        if categorical_data.isnull().any().any():
-            # Verificar si el porcentaje de datos faltantes es menor que el umbral
-            if categorical_data.isnull().mean().mean() < self.missing_threshold:
-                # Ajustar el imputador a todas las variables categóricas
-                self.categorical_imputer.fit(categorical_data)
-                # Guardar el imputador en el diccionario de transformadores
-                self.transformers['categorical_imputer'] = self.categorical_imputer
-            else:
-                print(f"Al menos una de las columnas categóricas tiene un porcentaje de datos faltantes mayor al {self.missing_threshold * 100}%")
-        else:
-            print("No hay datos faltantes en las columnas categóricas, no se requiere imputación.")
+        categorical_columns = []
+        categorical_columns_null = []
+        # Verificar si hay datos faltantes en las variables numéricas
+        for column in categorical_data.columns:
+            if categorical_data[column].isnull().any():
+                # Verificar si el porcentaje de datos faltantes es menor que el umbral
+                if categorical_data[column].isnull().mean() * 100 < self.missing_threshold:
+                    categorical_columns.append(column)
+                else:
+                    categorical_columns_null.append(column)
 
+        if categorical_columns_null:
+            print(f"Las siguientes columnas requieren revisión manual ya que tiene un porcentaje de datos faltantes mayor al {self.missing_threshold}%")
+            print(categorical_columns_null)
+            self.unprocessed_columns["categorical_columns_null"] = categorical_columns_null
+            # Eliminar las columnas del dataframe de entrenamiento
+            categorical_data = categorical_data.drop(categorical_columns_null, axis=1)
+            # Eliminar las columnas de la lista global de columnas categoricas
+            self.categorical_columns = [col for col in self.categorical_columns if col not in categorical_columns_null]
+        elif categorical_columns:
+            print("Se imputaron las siguientes columnas: ")
+            print(categorical_columns)
+
+        else:
+            print("No hay datos faltantes en las columnas numéricas, no se requiere imputación.")
+
+        if self.categorical_imputer != 'unknown':
+            # Entrenar el imputador
+            self.categorical_imputer.fit(categorical_data)
+            # Guardar el imputador en el diccionario de transformadores
+            self.transformers['categorical_imputer'] = self.categorical_imputer
+
+        #---------------------------------------------------------------------------------------------#
+        #--------------------------------------- Escalar ---------------------------------------------#
+        #---------------------------------------------------------------------------------------------#
         print("Escalar datos numéricas.")
         sys.stdout.flush()
         # Escalar variables numéricas
@@ -294,8 +380,10 @@ class DataPreprocessor:
    
         # Imputar datos nulos en variables categóricas
         if 'categorical_imputer' in self.transformers:
-            self.X[self.categorical_columns] = self.transformers['categorical_imputer'].transform(self.X[self.categorical_columns])
-
+            if self.categorical_imputer == 'unknown':
+                self.X[self.categorical_columns] = self.X[self.categorical_columns].fillna(self.categorical_imputer)
+            else:
+                self.X[self.categorical_columns] = self.transformers['categorical_imputer'].transform(self.X[self.categorical_columns])
 
         print("Escalar datos numéricos.")
         sys.stdout.flush()
