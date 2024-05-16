@@ -4,14 +4,14 @@ Este proyecto permite generar modelos de Machine Learning supervisado para probl
 
 ## Instrucciones de uso
 
-1. **Crear un Entorno Virtual:**
-   - Se recomienda utilizar una versión de Python 3.9.6. Puedes crear un entorno virtual siguiendo las instrucciones en [este enlace](https://docs.python.org/es/3/tutorial/venv.html).
+1. **Abrir el notebook en Google Colab:**
+   - Abrir el notebook llamado ME03_G13_[1036668535]_[1037651080].ipynb, ubicado en la raíz de este repositorio, usando Google Colaboratory.
 
-2. **Instalar Dependencias:**
-   - Una vez activado el entorno virtual, instala las dependencias del archivo `requirements.txt` utilizando el siguiente comando:
-     ```bash
-     pip install -r requirements.txt
-     ```
+2. **Clonar repositorio e instalar dependencias:**
+   - Una vez abierto el notebook en Google Colab, ejecutar en orden las dos primeras sentencias
+   - !git clone https://github.com/Saldarriaga0896/ME03_G13_1036668535_1037651080.git (Para clonar el repositorio en el ambiente de Colab)
+   - !pip install -r /content/ME03_G13_1036668535_1037651080/requirements.txt (Para instalar las librerías necesarias)
+     
 3. **Configuración del Proyecto:**
    Ajusta los parámetros del proyecto en el archivo de configuración "config.json".
    - Configuración dataset a procesar:
@@ -45,11 +45,11 @@ Este proyecto permite generar modelos de Machine Learning supervisado para probl
         - `models_classification`: Modelos de clasificacion que van a competir. Puede activar o desactivar con las banderas true o false.
         - `params_classification`: Hiperparametros de cada modelo. Puede ser modificados los rangos.
 
-4. **Ejecutar el Archivo `main.py`:**
-   - Una vez configurado, ejecuta el archivo `main.py` para comenzar el proceso de generación de modelos.
+4. **Ejecutar los pasos del notebook:**
+   - Una vez configurado, ejecuta los pasos siguientes del notebook para obtener los resultados preprocesados (También se puede ejecutar el notebook completo).
 
 ## ACLARACIONES:
-    1. Tratamiento de fechas.
-    2. Caracteristicas compuestas Ejemplo: Distancia = [15Km,20.000mts, 12Km] - deben indicarse la columna la unidad y los datos serán los valores . Distancia(KM) = [15,20,12]
-    3. Textos como oraciones, fraces, articulos , etc. Solo se aceptaran categorías claras. 
+    1. El módulo no incluye tratamiento de fechas. Se recomienda separar en diferentes columnas los datos (año, mes, día, hora, etc)
+    2. Caracteristicas compuestas, por ejemplo: Distancia = [15Km,20.000mts, 12Km] - deben indicarse la columna la unidad y los datos serán los valores . Distancia(KM) = [15,20,12]
+    3. Textos como oraciones, frases, articulos , etc. Solo se aceptaran categorías claras. 
     4. Los columnas con grandes desbalanceos entre caracteristicas o nulos . Se dejarán aparte en una lista para que el usuario defina que preprocesamiento aplicar para dichas columnas o si desea eliminarlas. 
