@@ -1,6 +1,6 @@
 {
     "project_name" : "prueba",
-    "data_path": "data/bank-full copy.csv", 
+    "data_path": "/content/ME03_G13_1036668535_1037651080/data/bank-full copy.csv", 
     "sep" : ";",
     "target_column": "y",
     "split" : 0.1,
