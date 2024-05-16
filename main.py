@@ -23,15 +23,14 @@ path_predict = 'data/predict_' + config.get('project_name')
 preprocessor = DataPreprocessor(config)
 
 print("------- Preprocesamiento de los datos -------------")
-
 # Carga del dataset y configuraciones
-preprocessor.load_dataset()
-# Tratamiento columnas categóricas
-preprocessor.transform_categorical_columns()
+df = preprocessor.load_dataset()
 # Descripción de los datos
-#preprocessor.descriptive_analysis()
-# Guardar un porcentaje de datos para predicciones
-preprocessor.split_data_for_predictions(path_predict)
+preprocessor.descriptive_analysis(df)
+# Validar datos
+preprocessor.validate_data()
+# Manejo de columnas que no se pueden procesar
+preprocessor.check_abnormal_columns()
 # Eliminar datos atipicos de las variables numericas
 preprocessor.remove_outliers_zscore()
 # Ajustar el preprocesador a los datos
@@ -39,11 +38,13 @@ preprocessor.fit()
 # Transformar los datos de entrenamiento
 preprocessor.transform()
 # Seleccion de caracteristicas representativas
-preprocessor.select_features()
+#preprocessor.select_features()
 # Guardar transformadores
 preprocessor.save_transformers(path_transforms)
 
+# Guardar un porcentaje de datos para predicciones
+preprocessor.split_data_for_predictions(path_predict)
 # Obtener las variables predictoras "X" y a predecir "y" procesadas.
-X,y = preprocessor.get_processed_dataframe()
+df_processed = preprocessor.get_processed_dataframe()
 
-print(X,y)
+print(df_processed)
