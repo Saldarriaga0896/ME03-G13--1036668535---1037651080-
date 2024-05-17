@@ -17,7 +17,7 @@ Este proyecto permite generar modelos de Machine Learning supervisado para probl
      
      !pip install -r /content/ME03_G13_1036668535_1037651080/requirements.txt
 
-   - Cuando se hayan instalado las dependencias, Google Colab solicitará una nueva ejecución de la celda para aplicar los cambios correctamente
+   - Cuando se hayan instalado las dependencias, Google Colab solicitará que reinicie la sesión para aplicar los cambios correctamente.
      
 5. **Configuración del Proyecto:**
    Ajusta los parámetros del proyecto en el archivo de configuración "config.json".
@@ -42,6 +42,7 @@ Este proyecto permite generar modelos de Machine Learning supervisado para probl
 
 6. **Ejecutar las celdas siguientes:**
    - Una vez configurado el proyecto, ejecuta las celdas siguientes en Google Colab. Se ejecuta a partir del paso 3.3 indicado en el notebook.
+   - En un momento de la ejecución del paso 3.6, la función check_abnormal_columns solicita al usuario ingresar un valor 1 o 2 para continuar la ejecución o detener respectivamente.
   
 7. **Obtener el DataSet Procesado**:
    - Una vez haya finalizado la ejecución el dataset resultado se encontrará en la carpeta "/content/ME03_G13_1036668535_1037651080/data/" ubicada en Colaboratoy y este tendrá el nombre de 'project_name'__processed.csv (project_name se puede modificar en la configuración del proyecto).
