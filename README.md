@@ -4,8 +4,8 @@ Este proyecto permite generar modelos de Machine Learning supervisado para probl
 
 ## Instrucciones de uso
 
-1. **Crear un Entorno Virtual:**
-   - Se recomienda utilizar una versión de Python 3.9.6. Puedes crear un entorno virtual siguiendo las instrucciones en [este enlace](https://docs.python.org/es/3/tutorial/venv.html).
+1. **Abrir el notebook en Google Colaboratory:**
+   - Abrir el notebook llamado "ME03_G13_[1036668535]_[1037651080].ipynb"
 
 2. **Instalar Dependencias:**
    - Una vez activado el entorno virtual, instala las dependencias del archivo `requirements.txt` utilizando el siguiente comando:
