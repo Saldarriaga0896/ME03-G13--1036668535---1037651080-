@@ -1,8 +1,13 @@
+# Librerías para orquestar el proyecto
 import pandas as pd
 import json
 import sys
 from src.PreprocessingModule import DataPreprocessor
 
+
+#---------------------------------------------------------------#
+#------------ Carga de archivo de configuración ----------------#
+#---------------------------------------------------------------#
 def load_params(config_file):
   with open(config_file, 'r') as f:
       config = json.load(f)
@@ -33,18 +38,19 @@ preprocessor.validate_data()
 preprocessor.check_abnormal_columns()
 # Eliminar datos atipicos de las variables numericas
 preprocessor.remove_outliers_zscore()
+df2= preprocessor.get_processed_dataframe()
+# Descripción de los datos
+preprocessor.descriptive_analysis(df2)
+# Guardar un porcentaje de datos para predicciones
+preprocessor.split_data_for_predictions(path_predict)
 # Ajustar el preprocesador a los datos
 preprocessor.fit()
 # Transformar los datos de entrenamiento
 preprocessor.transform()
 # Seleccion de caracteristicas representativas
-#preprocessor.select_features()
+preprocessor.select_features()
 # Guardar transformadores
 preprocessor.save_transformers(path_transforms)
-
-# Guardar un porcentaje de datos para predicciones
-preprocessor.split_data_for_predictions(path_predict)
 # Obtener las variables predictoras "X" y a predecir "y" procesadas.
 df_processed = preprocessor.get_processed_dataframe()
-
 print(df_processed)

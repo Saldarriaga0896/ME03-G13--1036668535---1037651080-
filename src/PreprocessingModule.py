@@ -1,28 +1,32 @@
+#------------------------ Librerías para manipulación de los dataframes ----------------------#
 import pandas as pd
 import numpy as np
 import sys
 import re
 import unidecode
 
+#- Librerías para procesar los datos (Escalar, imputar, codificar, atípicos y balanceo) ----#
 from scipy.stats import zscore
 from sklearn.preprocessing import LabelEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.feature_selection import SelectKBest, f_regression
-from sklearn.exceptions import NotFittedError
-
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
-from imblearn.pipeline import Pipeline
 
+#------------------------ Librería para almacenar los transformadores ----------------------#
 import joblib
 
+#------------------------ Librerías para graficar y visualizar la data ----------------------#
 import matplotlib.pyplot as plt
 from matplotlib import style
 import seaborn as sns
 
 class DataPreprocessor:
     def __init__(self, config):
+        #-------------------------------------------------------------------------------------------------------------------------#
+        #------------------------ Carga de configuraciones del proyecto e inicialización de transformadores ----------------------#
+        #-------------------------------------------------------------------------------------------------------------------------#
         self.config = config
         self.path_file = self.config.get('data_path', None)
         self.sep = self.config.get('sep', ',')
@@ -47,8 +51,6 @@ class DataPreprocessor:
         self.target = self.config.get('target_column', None)
         self.model_type = self.config.get('model_type', None)
         self.threshold_outlier = self.config.get('threshold_outlier', 3)
-        self.lower_percentile = self.config.get('lower_percentile', 5)
-        self.upper_percentile = self.config.get('upper_percentile', 95)
         self.seed = 11 # semilla para la separacion de los datos
 
         self.balance_threshold = self.config.get('balance_thershold',0.5)
@@ -63,7 +65,7 @@ class DataPreprocessor:
 
         self.unprocessed_columns = {} # columnas no procesadas
 
-    # Función para cargar los datos y hacer depuración. 
+    # Función para cargar los datos y hacer depuración básica inicial 
     def load_dataset(self):
         print("---------------------------------------------------")
         sys.stdout.flush()
@@ -130,12 +132,18 @@ class DataPreprocessor:
 
     # Función para realizar un analisis descriptivo y una visualización de los datos
     def descriptive_analysis(self, df):
+        print("---------------------------------------------------")
+        sys.stdout.flush()
+        print("-------- Análisis y visualización de datos --------")
+        sys.stdout.flush()
+        print("---------------------------------------------------")
+        sys.stdout.flush()
         print(" Información de los datos: ")
         sys.stdout.flush() 
         print(self.df.info())
         sys.stdout.flush() 
 
-        # Análisis descriptivo de variables numéricas
+        # Análisis descriptivo y visualización de variables numéricas
         if self.numeric_columns is not None:
             numeric_data = df[self.numeric_columns]
             if not numeric_data.empty:
@@ -151,7 +159,7 @@ class DataPreprocessor:
                 plt.tight_layout()
                 plt.show()
         
-        # Análisis descriptivo de variables categóricas
+        # Análisis descriptivo y visualización de variables categóricas
         if self.categorical_columns is not None:
             categorical_data = df[self.categorical_columns]
             if not categorical_data.empty: 
@@ -182,7 +190,7 @@ class DataPreprocessor:
                     plt.show()
                     sys.stdout.flush()
 
-    # Función para validar los datos.
+    # Función para validación mas detallada de los datos.
     def validate_data(self):
         print("---------------------------------------------------")
         sys.stdout.flush()
@@ -278,7 +286,7 @@ class DataPreprocessor:
                 else:
                     print("No hay columnas con valores mixtos")
     
-    # Función para validar las variables con anomalías identificadas.
+    # Función para validar las variables con anomalías identificadas, que no cumplen los criterios definidos.
     def check_abnormal_columns(self):
         print("---------------------------------------------------")
         sys.stdout.flush()
@@ -320,9 +328,13 @@ class DataPreprocessor:
 
     # Función para separar un % de los datos para realizar predicciones después de crear el modelo
     def split_data_for_predictions(self, save_path):
+        print("---------------------------------------------------")
+        sys.stdout.flush()
+        print(" Separación de datos oot para realizar predicciones")
+        sys.stdout.flush()
+        print("---------------------------------------------------")
+        sys.stdout.flush()
 
-        print("Separación de datos para predecir: ")
-        sys.stdout.flush()  
         # Seleccionar datos aleatorios
         np.random.seed(self.seed)
         num_rows_to_predict = int(len(self.df) * self.split)
@@ -344,7 +356,11 @@ class DataPreprocessor:
 
     # Función para remover los datos atipicos a través del z_score
     def remove_outliers_zscore(self):
-        print("Eliminar valores atipicos")
+        print("---------------------------------------------------")
+        sys.stdout.flush()
+        print("-------- Eliminación de datos atípicos ------------")
+        sys.stdout.flush()
+        print("---------------------------------------------------")
         sys.stdout.flush()
         # Calcular z-scores para las columnas numéricas
         z_scores = zscore(self.X[self.numeric_columns])
@@ -421,6 +437,7 @@ class DataPreprocessor:
             self.scaler_y.fit(self.y.reshape(-1, 1))
             self.transformers['scaler_y'] = self.scaler_y
 
+        # Si el modelo es de clasificación se codifica la variable objetivo
         if self.model_type == 'Classification':
             self.label_encoder.fit_transform(self.y)
             self.transformers['label_encoder']  = self.label_encoder
@@ -468,34 +485,37 @@ class DataPreprocessor:
         self.X.drop(columns=self.categorical_columns, inplace=True)
         self.X = pd.concat([self.X, encoded_df], axis=1)
   
-        # Si el modelo es de clasificación realizar Balanceo de datos
+        # Si el modelo es de clasificación realizar codificación de variable objetivo y balanceo si aplica
         if self.model_type == "Classification":
             print("Codificación de variable a predecir.")
             sys.stdout.flush()
-            self.y = pd.Series(self.transformers['label_encoder'].transform(self.y))
-            # Mostramos las etiquetas codificadas
-            print("Etiquetas codificadas:", self.y)
+            self.y = pd.Series(self.transformers['label_encoder'].transform(self.y), name=self.y.name)
 
             # Mostramos el mapeo de etiquetas originales a códigos numéricos
             print("Mapeo de etiquetas originales a códigos numéricos:")
             for label, code in zip(self.transformers['label_encoder'].classes_, self.transformers['label_encoder'].transform(self.transformers['label_encoder'].classes_)):
                 print(f"{label}: {code}")
 
-            print("Balanceo de datos: ")
-            sys.stdout.flush()
-            print(f"Datos balanceados usando {self.balance_method} con {self.sampler}")
-            sys.stdout.flush()   
-            print(f"cantidad clases antes del balanceo: {self.y.value_counts()}")
-            sys.stdout.flush()   
-            X_resampled, y_resampled = self.sampler.fit_resample(self.X, self.y)
-            print("y_resampled")
-            sys.stdout.flush()
-            self.X = X_resampled
-            self.y = y_resampled  
-            print(f"cantidad clases despues del balanceo: {self.y.value_counts()}")
-            sys.stdout.flush()  
+            # Calcular el porcentaje de cada clase
+            class_counts = self.y.value_counts(normalize=True)
+            print(f"Porcentajes de las clases:\n{class_counts}")
+            #Verificar si el porcentaje de alguna clase supera el umbral
+            if class_counts.max() > self.balance_threshold:
+                print("Balanceo de datos: ")
+                sys.stdout.flush()
+                print(f"Datos balanceados usando {self.balance_method} con {self.sampler}")
+                sys.stdout.flush()   
+                print(f"cantidad clases antes del balanceo:\n{self.y.value_counts()}")
+                sys.stdout.flush()   
+                X_resampled, y_resampled = self.sampler.fit_resample(self.X, self.y)
+                self.X = X_resampled
+                self.y = y_resampled  
+                print(f"cantidad clases despues del balanceo:\n{self.y.value_counts()}")
+                sys.stdout.flush()  
+            else:
+                print("No requiere balanceo de datos")
         
-        return self.X
+        return self.X, self.y
     
     # Función para seleccionar las caracteristicas mas representativas
     def select_features(self):
@@ -539,46 +559,4 @@ class DataPreprocessor:
         except Exception as e:
             print(f"Error al guardar las transformaciones: {e}")
 
-    # Función para cargar los transformadores.
-    def load_transformers(self, filename):
-        print("Cargando transformadores: ")
-        sys.stdout.flush()
-
-        try:
-            # Carga el diccionario del archivo usando joblib
-            transformers = joblib.load(filename)
-            print(f"Las transformaciones se cargaron desde '{filename}'.")
-            return transformers
-        except Exception as e:
-            print(f"Error al cargar las transformacioens: {e}")
-
-    # Función para aplicar los transformadores a los datos a predecir
-    def apply_transformers(self, transformers, X):
-        print("Aplicando transformadores: ")
-        sys.stdout.flush()
-
-        # Obtener columnas numericas y categoricas.
-        numeric_columns = X.select_dtypes(include=['number']).columns
-        categorical_columns = X.select_dtypes(include=['object', 'category']).columns
-
-        # Revisar los transformadores, de acuerdo a las llaves aplicar sobre los datos
-        for name, transformer in transformers.items():
-            if 'numeric_imputer' in name:
-                X[numeric_columns] = transformers['numeric_imputer'].transform(X[numeric_columns])
-            elif 'categorical_imputer' in name:
-               X[categorical_columns] = transformers['categorical_imputer'].transform(X[categorical_columns])
-            elif name == 'scaler_X':
-                X[numeric_columns] = transformer.transform(X[numeric_columns])
-            elif name == 'one_hot_encoder':
-                encoded_feature_names = []
-                for i, column in enumerate(categorical_columns):
-                    encoded_feature_names.extend([f"{column}_{category}" for category in transformer.categories_[i]])
-
-                encoded_features = transformer.transform(X[categorical_columns])
-                encoded_df = pd.DataFrame(encoded_features.toarray(), columns=encoded_feature_names)
-                X.drop(columns=categorical_columns, inplace=True)
-                X = pd.concat([X, encoded_df], axis=1)
-            elif name == 'feature_selector':
-                X = X[transformers['feature_selector']]
-
-        return X
+  
