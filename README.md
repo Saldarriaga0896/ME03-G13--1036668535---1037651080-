@@ -5,14 +5,21 @@ Este proyecto permite generar modelos de Machine Learning supervisado para probl
 ## Instrucciones de uso
 
 1. **Abrir el notebook en Google Colaboratory:**
-   - Abrir el notebook llamado "ME03_G13_[1036668535]_[1037651080].ipynb"
+   - Abrir el notebook llamado "ME03_G13_[1036668535]_[1037651080].ipynb" en Google Colab
+2. **Leer las recomendaciones sobre las características de los DataSet**
+3. **Clonar el repositorio:**
+   - Ejecutar la celda que clona el repositorio en el ambiente de Google Colab:
+  
+     !git clone https://github.com/Saldarriaga0896/ME03_G13_1036668535_1037651080.git
 
-2. **Instalar Dependencias:**
-   - Una vez activado el entorno virtual, instala las dependencias del archivo `requirements.txt` utilizando el siguiente comando:
-     ```bash
-     pip install -r requirements.txt
-     ```
-3. **Configuración del Proyecto:**
+4. **Instalar Dependencias:**
+   - Instalar las dependencias del archivo `requirements.txt` ejecutando la celda que contiene el siguiente código:
+     
+     !pip install -r /content/ME03_G13_1036668535_1037651080/requirements.txt
+
+   - Cuando se hayan instalado las dependencias, Google Colab solicitará una nueva ejecución de la celda para aplicar los cambios correctamente
+     
+5. **Configuración del Proyecto:**
    Ajusta los parámetros del proyecto en el archivo de configuración "config.json".
    - Configuración dataset a procesar:
       - `project_name`: Nombre del proyecto para guardar e identificar las transformaciones / modelos / datos.
@@ -33,11 +40,6 @@ Este proyecto permite generar modelos de Machine Learning supervisado para probl
       - `k_features`: Porcentaje de caractaristicas representativas a seleccionar para entrenar el modelo. 
       - `delete_columns`: Columnas que el usuario identifique que se puedan eliminar.
 
-4. **Ejecutar el Archivo `main.py`:**
-   - Una vez configurado, ejecuta el archivo `main.py` para comenzar el proceso de generación de modelos.
+6. **Ejecutar las celdas siguientes:**
+   - Una vez configurado el proyecto, ejecuta las celdas siguientes en Google Colab. Se ejecuta a partir del paso 3.3 indicado en el notebook.
 
-## ACLARACIONES:
-    1. Tratamiento de fechas.
-    2. Caracteristicas compuestas Ejemplo: Distancia = [15Km,20.000mts, 12Km] - deben indicarse la columna la unidad y los datos serán los valores . Distancia(KM) = [15,20,12]
-    3. Textos como oraciones, fraces, articulos , etc. Solo se aceptaran categorías claras. 
-    4. Los columnas con grandes desbalanceos entre caracteristicas o nulos . Se dejarán aparte en una lista para que el usuario defina que preprocesamiento aplicar para dichas columnas o si desea eliminarlas. 
