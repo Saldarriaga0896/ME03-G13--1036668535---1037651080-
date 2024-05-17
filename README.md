@@ -1,6 +1,6 @@
 # Proyecto de Generación de Modelos de Machine Learning Supervisado
 
-Este proyecto permite generar modelos de Machine Learning supervisado para problemas de regresión y clasificación.
+Este proyecto permite generar modelos de Machine Learning supervisado para problemas de regresión y clasificación, siempre que la clasificación sea binaria.
 
 ## Instrucciones de uso
 
