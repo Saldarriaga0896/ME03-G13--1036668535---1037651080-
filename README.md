@@ -42,4 +42,7 @@ Este proyecto permite generar modelos de Machine Learning supervisado para probl
 
 6. **Ejecutar las celdas siguientes:**
    - Una vez configurado el proyecto, ejecuta las celdas siguientes en Google Colab. Se ejecuta a partir del paso 3.3 indicado en el notebook.
+  
+7. **Obtener el DataSet Procesado**:
+   - Una vez haya finalizado la ejecución el dataset resultado se encontrará en la carpeta "/content/ME03_G13_1036668535_1037651080/data/" ubicada en Colaboratoy y este tendrá el nombre de 'project_name'__processed.csv (project_name se puede modificar en la configuración del proyecto).
 
